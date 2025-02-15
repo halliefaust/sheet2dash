@@ -111,10 +111,22 @@ export default function Dashboard() {
           {data.charts.map((chart, index) => (
             <div key={index} className="p-2">
               <Card className="shadow-lg h-full">
-                <CardHeader className="flex justify-between items-center">
-                  <span className="text-lg font-semibold">{chart.title}</span>
-                  <span className="drag-handle cursor-move text-gray-500">⋮⋮</span>
-                </CardHeader>
+              <CardHeader className="flex items-center justify-between w-full">
+                <div className="flex-grow flex justify-center">
+                  <input
+                    type="text"
+                    value={chart.title}
+                    onChange={(e) => {
+                      const newCharts = [...data.charts];
+                      newCharts[index].title = e.target.value;
+                      setChartData({ ...data, charts: newCharts });
+                    }}
+                    className="text-lg font-semibold border-none focus:outline-none bg-transparent text-center w-[90%] max-w-full px-2 py-1"
+                    style={{ minWidth: "500px" }} // Ensures a minimum width
+                  />
+                </div>
+                <span className="drag-handle cursor-move text-gray-500">⋮⋮</span>
+              </CardHeader>
                 <CardContent className="flex justify-center items-center h-full">
                   <ResizableChart chart={chart} />
                 </CardContent>
@@ -155,8 +167,8 @@ export function ResizableChart({ chart }) {
   return (
     <div ref={ref} className="w-full h-full flex justify-center items-center pb-24 overflow-hidden">
       {chart.type === "line" && width && height && (
-        <LineChart width={chartWidth} height={chartHeight} data={chart.data}>
-          <XAxis dataKey={chart.xAxis} />
+        <LineChart width={chartWidth} height={chartHeight} data={chart.data} margin={{ bottom: 24 }}>
+          <XAxis dataKey={chart.xAxis} label={{ value: chart.xAxis, position: "bottom" }}  />
           <YAxis />
           <Tooltip />
           <CartesianGrid strokeDasharray="3 3" />
@@ -166,8 +178,8 @@ export function ResizableChart({ chart }) {
         </LineChart>
       )}
       {chart.type === "bar" && width && height && (
-        <BarChart width={chartWidth} height={chartHeight} data={chart.data}>
-          <XAxis dataKey={chart.xAxis} />
+        <BarChart width={chartWidth} height={chartHeight} data={chart.data} margin={{ bottom: 24 }}>
+          <XAxis dataKey={chart.xAxis} label={{ value: chart.xAxis, position: "bottom" }} />
           <YAxis />
           <Tooltip />
           <CartesianGrid strokeDasharray="3 3" />
