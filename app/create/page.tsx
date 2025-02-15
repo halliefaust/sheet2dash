@@ -1,16 +1,17 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
 
 export default function CreateDashboard() {
   const [sheetUrl, setSheetUrl] = useState("")
+  const [prompt, setPrompt] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
@@ -19,10 +20,10 @@ export default function CreateDashboard() {
     setIsLoading(true)
 
     try {
-      const response = await fetch("http://127.0.0.1:5000/analyze-sheet", {
+      const response = await fetch("http://localhost:5000/analyze-sheet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sheet_url: sheetUrl }),
+        body: JSON.stringify({ sheet_url: sheetUrl, prompt: prompt }),
       })
 
       if (!response.ok) {
@@ -63,6 +64,16 @@ export default function CreateDashboard() {
                 value={sheetUrl}
                 onChange={(e) => setSheetUrl(e.target.value)}
                 required
+              />
+            </div>
+            <div>
+              <Label htmlFor="prompt">Dashboard Preferences (Optional)</Label>
+              <Textarea
+                id="prompt"
+                placeholder="Enter any specific requirements for your dashboard (e.g., types of charts, color schemes, etc.)"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                className="min-h-[100px]"
               />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
