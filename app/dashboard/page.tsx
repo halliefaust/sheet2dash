@@ -6,6 +6,8 @@ import { Responsive, WidthProvider } from "react-grid-layout"
 import { useResizeDetector } from "react-resize-detector"
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell } from "recharts"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { RefreshCw } from 'lucide-react'
 
 import "react-grid-layout/css/styles.css"
 import "react-resizable/css/styles.css"
@@ -21,6 +23,11 @@ export default function Dashboard() {
   useEffect(() => {
     setMounted(true) // Prevents hydration mismatch
   }, [])
+
+  const handleSync = () => {
+    // Implement sync functionality here
+    console.log("Syncing data...")
+  }
 
   if (!dataParam) {
     return <div>Error: No data provided</div>
@@ -74,6 +81,11 @@ export default function Dashboard() {
           ))}
         </ResponsiveGridLayout>
       </main>
+      <div className="fixed bottom-4 right-4">
+        <Button onClick={handleSync} className="rounded-full w-12 h-12 p-0">
+          <RefreshCw className="h-6 w-6" />
+        </Button>
+      </div>
     </div>
   )
 }
