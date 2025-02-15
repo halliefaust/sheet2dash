@@ -82,8 +82,16 @@ export default function Dashboard() {
         </ResponsiveGridLayout>
       </main>
       <div className="fixed bottom-4 right-4">
-        <Button onClick={handleSync} className="rounded-full w-12 h-12 p-0">
-          <RefreshCw className="h-6 w-6" />
+        <Button 
+          onClick={handleSync} 
+          className="rounded-full w-12 h-12 p-0 overflow-hidden transition-all duration-300 ease-in-out hover:w-24 group"
+        >
+          <span className="absolute inset-0 flex items-center justify-center">
+            <RefreshCw className="h-6 w-6 group-hover:opacity-0 transition-opacity duration-300" />
+          </span>
+          <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            Sync
+          </span>
         </Button>
       </div>
     </div>
