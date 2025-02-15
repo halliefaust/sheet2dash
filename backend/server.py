@@ -159,6 +159,11 @@ def analyze_sheet():
 
     # Ask the LLM to select/improve the best chart configurations
     llm_answer_str = ask_llm_about_dashboard(data_rows, candidate_charts)
+    llm_answer_str = llm_answer_str.lstrip()
+    # If the response starts with "json", remove it.
+    if llm_answer_str.startswith("json"):
+        llm_answer_str = llm_answer_str[len("json"):].strip()
+    llm_chart = json.loads(llm_answer_str)
 
     try:
         llm_chart = json.loads(llm_answer_str)
