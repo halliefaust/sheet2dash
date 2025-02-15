@@ -19,13 +19,20 @@ export default function CreateDashboard() {
     setIsLoading(true)
 
     try {
-      // Here you would typically send the sheetUrl to your backend
-      // and get a dashboard ID in response
-      // For now, we'll simulate this with a timeout
-      await new Promise((resolve) => setTimeout(resolve, 2000))
+      const response = await fetch("http://127.0.0.1:5000/analyze-sheet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sheet_url: sheetUrl }),
+      })
 
-      const dashboardId = "example-id"
-      router.push(`/dashboard/${dashboardId}`)
+      if (!response.ok) {
+        throw new Error("Failed to fetch data")
+      }
+
+      const result = await response.json()
+
+      // Pass the received data to the dashboard page
+      router.push(`/dashboard?data=${encodeURIComponent(JSON.stringify(result))}`)
     } catch (error) {
       toast({
         title: "Error",

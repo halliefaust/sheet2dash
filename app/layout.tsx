@@ -3,7 +3,7 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Sheet2Dash',
-  description: 'Created with v0',
+  description: 'Instantly create dynamic dashboard from sheets',
   icons: {
     icon: '/favicon.ico',
   },

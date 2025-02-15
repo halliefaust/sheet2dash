@@ -2,6 +2,7 @@ import os
 import re
 import requests
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from openai import OpenAI
 
 # Load API keys from environment variables
@@ -18,6 +19,7 @@ if not GOOGLE_API_KEY:
 client = OpenAI()
 
 app = Flask(__name__)
+CORS(app)  # Enable CORS for all routes
 
 def extract_sheet_id(sheet_url):
     """Extracts the spreadsheet ID from a Google Sheets URL."""
