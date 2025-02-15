@@ -8,6 +8,9 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, P
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { RefreshCw } from 'lucide-react'
+import jsPDF from 'jspdf'
+import html2canvas from 'html2canvas'
+import { Download } from 'lucide-react'
 
 import "react-grid-layout/css/styles.css"
 import "react-resizable/css/styles.css"
@@ -120,11 +123,15 @@ export default function Dashboard() {
   return (
     <div className="flex flex-col min-h-screen">
       <header className="bg-white border-b shadow-md">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <h1 className="text-2xl font-bold text-gray-800">📊 Dashboard</h1>
+          <Button onClick={handleDownloadPDF} className="flex items-center gap-2">
+            <Download className="h-4 w-4" />
+            Download PDF
+          </Button>
         </div>
       </header>
-      <main className="flex-grow container mx-auto px-4 py-8">
+      <main id="dashboard-content" className="flex-grow container mx-auto px-4 py-8">
         <ResponsiveGridLayout
           className="layout"
           layouts={{ lg: layouts }}
@@ -193,6 +200,20 @@ const COLOR_PALETTE = ["#8884d8", "#82ca9d", "#ffc658", "#ff7300", "#d0ed57"]
 
 function getColor(index) {
   return COLOR_PALETTE[index % COLOR_PALETTE.length] // Cycles through colors
+}
+
+const handleDownloadPDF = async () => {
+  const element = document.getElementById('dashboard-content')
+  const canvas = await html2canvas(element)
+  const data = canvas.toDataURL('image/png')
+
+  const pdf = new jsPDF()
+  const imgProperties = pdf.getImageProperties(data)
+  const pdfWidth = pdf.internal.pageSize.getWidth()
+  const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width
+
+  pdf.addImage(data, 'PNG', 0, 0, pdfWidth, pdfHeight)
+  pdf.save('dashboard.pdf')
 }
 
 export function ResizableChart({ chart }) {
