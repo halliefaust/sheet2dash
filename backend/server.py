@@ -188,5 +188,24 @@ def analyze_sheet():
 
     return jsonify(llm_chart)
 
+# TODO: modify later
+@app.route('/resync', methods=['GET'])
+def resync():
+    testParam = {
+        "charts": [
+            {
+                "data": [
+                    {"": "1", "jack": 10, "jill": 12},
+                    {"": "2", "jack": 15, "jill": 30}
+                ],
+                "series": [{"key": "jack"}, {"key": "jill"}],
+                "title": "Student Scores Over Time",
+                "type": "line",
+                "xAxis": ""
+            }
+        ]
+    }
+    return jsonify(testParam)
+
 if __name__ == '__main__':
     app.run(debug=True)

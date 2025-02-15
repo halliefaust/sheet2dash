@@ -11,6 +11,7 @@ import { RefreshCw } from 'lucide-react'
 
 import "react-grid-layout/css/styles.css"
 import "react-resizable/css/styles.css"
+import { toast } from "@/components/ui/use-toast"
 
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
@@ -24,17 +25,58 @@ export default function Dashboard() {
     setMounted(true) // Prevents hydration mismatch
   }, [])
 
-  const handleSync = () => {
-    // Implement sync functionality here
-    console.log("Syncing data...")
-  }
-
   if (!dataParam) {
     return <div>Error: No data provided</div>
   }
 
-  const data = JSON.parse(decodeURIComponent(dataParam))
+  const [data, setChartData] = useState(() => {
+    if (dataParam) {
+      console.log(dataParam)
+      return JSON.parse(decodeURIComponent(dataParam))
+    }
+    return { charts: [] }
+  })
 
+  const handleSync = async () => {
+        // Implement sync functionality here
+        console.log("Syncing data...")
+      
+        try {
+          // Create a JSON object to send
+          // TODO: clear the chart data
+          const jsonObject = { sheet_url: "example_sheet_url_here", data: data } // Replace this with your actual sheet URL
+      
+          // Convert the JSON object to a query string
+          const queryString = new URLSearchParams(jsonObject).toString()
+      
+          // Make the GET request
+          const response = await fetch(`http://127.0.0.1:5000/resync?${queryString}`)
+      
+          if (!response.ok) {
+            throw new Error("Failed to resync data")
+          }
+      
+          const result = await response.json()
+      
+          toast({
+            title: "Success",
+            description: "Data successfully resynced.",
+            variant: "default",
+          })
+      
+      // Update chart data
+      setChartData(result)
+        } catch (error) {
+          toast({
+            title: "Error",
+            description: "Failed to resync data. Please try again.",
+            variant: "destructive",
+          })
+          console.error(error)
+        }
+      }
+
+  
   const layouts = data.charts.map((chart, index) => ({
     i: index.toString(),
     x: (index * 2) % 6,
