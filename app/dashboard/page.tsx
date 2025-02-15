@@ -44,7 +44,7 @@ export default function Dashboard() {
         try {
           // Create a JSON object to send
           // TODO: clear the chart data
-          const jsonObject = { sheet_url: "example_sheet_url_here", data: data } // Replace this with your actual sheet URL
+          const jsonObject = { sheet_url: data.sheet_url, data: data }
       
           // Convert the JSON object to a query string
           const queryString = new URLSearchParams(jsonObject).toString()
@@ -75,6 +75,32 @@ export default function Dashboard() {
           console.error(error)
         }
       }
+  
+  const handleRegenerate = async () => {
+    console.log("Regenerating data...")
+    try {
+      const response = await fetch("http://127.0.0.1:5000/analyze-sheet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sheet_url: data.sheet_url }),
+      })
+
+      console.log("Received response!") // TODO: delete later
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch data")
+      }
+
+      const result = await response.json()
+      setChartData(result);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create dashboard. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }
 
   
   const layouts = data.charts.map((chart, index) => ({
@@ -135,10 +161,21 @@ export default function Dashboard() {
           ))}
         </ResponsiveGridLayout>
       </main>
-      <div className="fixed bottom-4 right-4">
+      <div className="fixed bottom-4 right-4 flex flex-col space-y-4">
+        <Button 
+          onClick={handleRegenerate} 
+          className="rounded-full w-12 h-12 p-0 overflow-hidden transition-all duration-300 ease-in-out hover:w-24 group relative"
+        >
+          <span className="absolute inset-0 flex items-center justify-center">
+            <RefreshCw className="h-6 w-6 group-hover:opacity-0 transition-opacity duration-300" />
+          </span>
+          <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            Regenerate
+          </span>
+        </Button>
         <Button 
           onClick={handleSync} 
-          className="rounded-full w-12 h-12 p-0 overflow-hidden transition-all duration-300 ease-in-out hover:w-24 group"
+          className="rounded-full w-12 h-12 p-0 overflow-hidden transition-all duration-300 ease-in-out hover:w-24 group relative"
         >
           <span className="absolute inset-0 flex items-center justify-center">
             <RefreshCw className="h-6 w-6 group-hover:opacity-0 transition-opacity duration-300" />

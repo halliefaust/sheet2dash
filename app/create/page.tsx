@@ -20,7 +20,7 @@ export default function CreateDashboard() {
     setIsLoading(true)
 
     try {
-      const response = await fetch("http://localhost:5000/analyze-sheet", {
+      const response = await fetch("http://127.0.0.1:5000/analyze-sheet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ sheet_url: sheetUrl, prompt: prompt }),
@@ -31,6 +31,7 @@ export default function CreateDashboard() {
       }
 
       const result = await response.json()
+      result.sheet_url = sheetUrl
 
       // Pass the received data to the dashboard page
       router.push(`/dashboard?data=${encodeURIComponent(JSON.stringify(result))}`)
