@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
-import { Pencil, RefreshCw, Send, X, Download } from "lucide-react"
+import { Pencil, RefreshCw, Send, X, Download, Loader2 } from "lucide-react"
 
 import "react-grid-layout/css/styles.css"
 import "react-resizable/css/styles.css"
@@ -189,13 +189,26 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="bg-white border-b shadow-md">
+    <div className="flex flex-col min-h-screen bg-gray-50">
+
+      <header className="sticky top-0 z-50 bg-white border-b">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-800">📊 Dashboard</h1>
-          <Button onClick={handleDownloadPDF} className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-gray-800">Dashboard</h1>
+            {isLoading && (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Loading...
+              </div>
+            )}
+          </div>
+          <Button
+            onClick={handleDownloadPDF}
+            className="flex items-center gap-2"
+            variant="outline"
+          >
             <Download className="h-4 w-4" />
-            Download PDF
+            Export PDF
           </Button>
         </div>
       </header>
@@ -267,9 +280,6 @@ export default function Dashboard() {
             <Button variant="ghost" size="sm" onClick={() => setShowChat(false)}>
               <X className="h-4 w-4" />
             </Button>
-          </div>
-          <div className="mb-4">
-            <p className="text-sm text-gray-600">Enter your preferences for the modified dashboard:</p>
           </div>
           <div className="flex items-center">
             <Input

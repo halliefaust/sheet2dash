@@ -168,7 +168,6 @@ def analyze_sheet():
     # If the response starts with "json", remove it.
     if llm_answer_str.startswith("json"):
         llm_answer_str = llm_answer_str[len("json"):].strip()
-    llm_chart = json.loads(llm_answer_str)
 
     try:
         llm_chart = json.loads(llm_answer_str)
