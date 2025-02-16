@@ -32,7 +32,7 @@ export default function Dashboard() {
 
   const [data, setChartData] = useState({
     charts: [], // Initialize with an empty string or some default value
-  });
+  })
 
   if (!sheetUrl) {
     return <div>Error: No url provided</div>
@@ -91,53 +91,52 @@ export default function Dashboard() {
   }, [sheetUrl, userPrompt])
 
   const handleSync = async () => {
-        // Implement sync functionality here
-        console.log("Syncing data...")
-      
-        try {
-          // Create a JSON object to send
-          // TODO: clear the chart data
-        const response = await fetch("http://127.0.0.1:5000/resync", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ sheet_url: sheetUrl, data: data })
-        });
-        
-      
-          if (!response.ok) {
-            throw new Error("Failed to resync data")
-          }
-      
-          const result = await response.json()
-      
-          toast({
-            title: "Success",
-            description: "Data successfully resynced.",
-            variant: "default",
-          })
-      
-      // Update chart data
+    // Implement sync functionality here
+    console.log("Syncing data...")
+
+    try {
+      // Create a JSON object to send
+      // TODO: clear the chart data
+      const response = await fetch("http://127.0.0.1:5000/resync", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ sheet_url: sheetUrl, data: data }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to resync data")
+      }
+
+      const result = await response.json()
+
+      toast({
+        title: "Success",
+        description: "Data successfully resynced.",
+        variant: "default",
+      })
+
+      // Update chart data
       setChartData(result)
-        } catch (error) {
-          toast({
-            title: "Error",
-            description: "Failed to resync data. Please try again.",
-            variant: "destructive",
-          })
-          console.error(error)
-        }
-      }
-  
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to resync data. Please try again.",
+        variant: "destructive",
+      })
+      console.error(error)
+    }
+  }
+
   const handleRegenerate = async () => {
     if (!sheetUrl) {
       toast({
         title: "Error",
         description: "Sheet URL is missing. Please provide a valid sheet URL.",
         variant: "destructive",
-      });
-      return;
+      })
+      return
     }
 
     console.log("Modifying data...")
@@ -155,7 +154,7 @@ export default function Dashboard() {
       }
 
       const result = await response.json()
-      setChartData(result);
+      setChartData(result)
 
       setShowChat(false)
       setPrompt("")
@@ -173,7 +172,6 @@ export default function Dashboard() {
     }
   }
 
-  
   const layouts = data.charts.map((chart, index) => ({
     i: index.toString(),
     x: (index * 2) % 6,
@@ -225,22 +223,27 @@ export default function Dashboard() {
           {data.charts.map((chart, index) => (
             <div key={index} className="p-2">
               <Card className="shadow-lg h-full">
-              <CardHeader className="flex items-center justify-between w-full">
-                <div className="flex-grow flex justify-center">
-                  <input
-                    type="text"
-                    value={chart.title}
-                    onChange={(e) => {
-                      const newCharts = [...data.charts];
-                      newCharts[index].title = e.target.value;
-                      setChartData({ ...data, charts: newCharts });
-                    }}
-                    className="text-lg font-semibold border-none focus:outline-none bg-transparent text-center w-[90%] max-w-full px-2 py-1"
-                    style={{ minWidth: "500px" }} // Ensures a minimum width
-                  />
-                </div>
-                <span className="drag-handle cursor-move text-gray-500">⋮⋮</span>
-              </CardHeader>
+                <CardHeader className="flex items-center w-full">
+                  <span
+                    className="drag-handle cursor-move text-gray-500 mr-2"
+                    style={{ alignSelf: "stretch", display: "flex", alignItems: "center" }}
+                  >
+                    ⋮⋮
+                  </span>
+                  <div className="flex-grow flex justify-center">
+                    <input
+                      type="text"
+                      value={chart.title}
+                      onChange={(e) => {
+                        const newCharts = [...data.charts]
+                        newCharts[index].title = e.target.value
+                        setChartData({ ...data, charts: newCharts })
+                      }}
+                      className="text-lg font-semibold border-none focus:outline-none bg-transparent text-center w-[90%] max-w-full px-2 py-1"
+                      style={{ minWidth: "500px" }} // Ensures a minimum width
+                    />
+                  </div>
+                </CardHeader>
                 <CardContent className="flex justify-center items-center h-full">
                   <ResizableChart chart={chart} />
                 </CardContent>
@@ -250,29 +253,29 @@ export default function Dashboard() {
         </ResponsiveGridLayout>
       </main>
       <div className="fixed bottom-4 right-4 flex flex-col items-end space-y-4">
-      <div className="relative">
-        <Button
-          onClick={() => setShowChat(true)}
-          className="rounded-full w-12 h-12 p-0 overflow-hidden transition-all duration-300 ease-in-out hover:w-24 group relative"
-        >
-          <span className="absolute inset-0 flex items-center justify-center">
-            <Pencil className="h-6 w-6 group-hover:opacity-0 transition-opacity duration-300" />
-          </span>
-          <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Modify</span>
-        </Button>
+        <div className="relative">
+          <Button
+            onClick={() => setShowChat(true)}
+            className="rounded-full w-12 h-12 p-0 overflow-hidden transition-all duration-300 ease-in-out hover:w-24 group relative"
+          >
+            <span className="absolute inset-0 flex items-center justify-center">
+              <Pencil className="h-6 w-6 group-hover:opacity-0 transition-opacity duration-300" />
+            </span>
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Modify</span>
+          </Button>
+        </div>
+        <div className="relative">
+          <Button
+            onClick={handleSync}
+            className="rounded-full w-12 h-12 p-0 overflow-hidden transition-all duration-300 ease-in-out hover:w-24 group relative"
+          >
+            <span className="absolute inset-0 flex items-center justify-center">
+              <RefreshCw className="h-6 w-6 group-hover:opacity-0 transition-opacity duration-300" />
+            </span>
+            <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Sync</span>
+          </Button>
+        </div>
       </div>
-      <div className="relative">
-        <Button
-          onClick={handleSync}
-          className="rounded-full w-12 h-12 p-0 overflow-hidden transition-all duration-300 ease-in-out hover:w-24 group relative"
-        >
-          <span className="absolute inset-0 flex items-center justify-center">
-            <RefreshCw className="h-6 w-6 group-hover:opacity-0 transition-opacity duration-300" />
-          </span>
-          <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Sync</span>
-        </Button>
-      </div>
-    </div>
       {showChat && (
         <div className="fixed bottom-20 right-4 w-80 bg-white rounded-lg shadow-lg p-4">
           <div className="flex justify-between items-center mb-4">
@@ -305,30 +308,30 @@ function getColor(index) {
 }
 
 const handleDownloadPDF = async () => {
-  const element = document.getElementById('dashboard-content')
+  const element = document.getElementById("dashboard-content")
   const canvas = await html2canvas(element)
-  const data = canvas.toDataURL('image/png')
+  const data = canvas.toDataURL("image/png")
 
   const pdf = new jsPDF()
   const imgProperties = pdf.getImageProperties(data)
   const pdfWidth = pdf.internal.pageSize.getWidth()
   const pdfHeight = (imgProperties.height * pdfWidth) / imgProperties.width
 
-  pdf.addImage(data, 'PNG', 0, 0, pdfWidth, pdfHeight)
-  pdf.save('dashboard.pdf')
+  pdf.addImage(data, "PNG", 0, 0, pdfWidth, pdfHeight)
+  pdf.save("dashboard.pdf")
 }
 
 export function ResizableChart({ chart }) {
   const { width, height, ref } = useResizeDetector()
 
-  const chartWidth = width ? width * 0.95 : 300  // Make it slightly smaller than container
+  const chartWidth = width ? width * 0.95 : 300 // Make it slightly smaller than container
   const chartHeight = height ? height * 0.95 : 250
 
   return (
     <div ref={ref} className="w-full h-full flex justify-center items-center pb-24 overflow-hidden">
       {chart.type === "line" && width && height && (
         <LineChart width={chartWidth} height={chartHeight} data={chart.data} margin={{ bottom: 24 }}>
-          <XAxis dataKey={chart.xAxis} label={{ value: chart.xAxis, position: "bottom" }}  />
+          <XAxis dataKey={chart.xAxis} label={{ value: chart.xAxis, position: "bottom" }} />
           <YAxis />
           <Tooltip />
           <CartesianGrid strokeDasharray="3 3" />
@@ -369,3 +372,4 @@ export function ResizableChart({ chart }) {
     </div>
   )
 }
+
