@@ -7,10 +7,10 @@ import { useResizeDetector } from "react-resize-detector"
 import { LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell } from "recharts"
 import { Card, CardHeader, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { RefreshCw } from 'lucide-react'
+import { Input } from "@/components/ui/input"
 import jsPDF from 'jspdf'
 import html2canvas from 'html2canvas'
-import { Download } from 'lucide-react'
+import { Pencil, RefreshCw, Send, X, Download } from "lucide-react"
 
 import "react-grid-layout/css/styles.css"
 import "react-resizable/css/styles.css"
@@ -39,6 +39,8 @@ export default function Dashboard() {
     }
     return { charts: [] }
   })
+  const [showChat, setShowChat] = useState(false)
+  const [prompt, setPrompt] = useState("")
 
   const handleSync = async () => {
         // Implement sync functionality here
@@ -81,12 +83,12 @@ export default function Dashboard() {
       }
   
   const handleRegenerate = async () => {
-    console.log("Regenerating data...")
+    console.log("Modifying data...")
     try {
       const response = await fetch("http://127.0.0.1:5000/analyze-sheet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sheet_url: data.sheet_url }),
+        body: JSON.stringify({ sheet_url: data.sheet_url, prompt: prompt }),
       })
 
       console.log("Received response!") // TODO: delete later
@@ -97,6 +99,13 @@ export default function Dashboard() {
 
       const result = await response.json()
       setChartData(result);
+      setShowChat(false)
+      setPrompt("")
+      toast({
+        title: "Success",
+        description: "Dashboard modified successfully.",
+        variant: "default",
+      })
     } catch (error) {
       toast({
         title: "Error",
@@ -170,29 +179,49 @@ export default function Dashboard() {
         </ResponsiveGridLayout>
       </main>
       <div className="fixed bottom-4 right-4 flex flex-col space-y-4">
-        <Button 
-          onClick={handleRegenerate} 
+        <Button
+          onClick={() => setShowChat(true)}
           className="rounded-full w-12 h-12 p-0 overflow-hidden transition-all duration-300 ease-in-out hover:w-24 group relative"
         >
           <span className="absolute inset-0 flex items-center justify-center">
-            <RefreshCw className="h-6 w-6 group-hover:opacity-0 transition-opacity duration-300" />
+            <Pencil className="h-6 w-6 group-hover:opacity-0 transition-opacity duration-300" />
           </span>
-          <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            Regenerate
-          </span>
+          <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Modify</span>
         </Button>
-        <Button 
-          onClick={handleSync} 
+        <Button
+          onClick={handleSync}
           className="rounded-full w-12 h-12 p-0 overflow-hidden transition-all duration-300 ease-in-out hover:w-24 group relative"
         >
           <span className="absolute inset-0 flex items-center justify-center">
             <RefreshCw className="h-6 w-6 group-hover:opacity-0 transition-opacity duration-300" />
           </span>
-          <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            Sync
-          </span>
+          <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Sync</span>
         </Button>
       </div>
+      {showChat && (
+        <div className="fixed bottom-20 right-4 w-80 bg-white rounded-lg shadow-lg p-4">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold">Modify Dashboard</h3>
+            <Button variant="ghost" size="sm" onClick={() => setShowChat(false)}>
+              <X className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="mb-4">
+            <p className="text-sm text-gray-600">Enter your preferences for the modified dashboard:</p>
+          </div>
+          <div className="flex items-center">
+            <Input
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="e.g., more bar charts, focus on sales data"
+              className="flex-grow mr-2"
+            />
+            <Button onClick={handleRegenerate} size="sm">
+              <Send className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
