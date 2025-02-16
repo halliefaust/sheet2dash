@@ -62,7 +62,6 @@ Please respond in JSON format only.
         )
 
         llm_response_content = response.choices[0].message.content.strip()
-        print("LLM Response:", llm_response_content)  # <-- Debug print
         return llm_response_content
 
     except Exception as e:
@@ -186,33 +185,117 @@ def analyze_sheet():
 
     return jsonify(final_response)
 
-# TODO: modify later
 @app.route('/resync', methods=['POST'])
 def resync():
-    # Parse JSON from the request body
     try:
         data = request.get_json()
-        print("Received Data:", data)  # Debugging output
+        sheet_url = data.get('sheet_url')
+        if not sheet_url:
+            return jsonify({"error": "No sheet_url provided"}), 400
 
-        # Example test response
-        testParam = {
-            "charts": [
-                {
-                    "data": [
-                        {"": "1", "jack": 10, "jill": 12},
-                        {"": "2", "jack": 15, "jill": 30}
-                    ],
-                    "series": [{"key": "jack"}, {"key": "jill"}],
-                    "title": "Student Scores Over Time",
-                    "type": "line",
-                    "xAxis": ""
-                }
-            ]
+        sheet_id = extract_sheet_id(sheet_url)
+        if not sheet_id:
+            return jsonify({"error": "Invalid Google Sheets URL"}), 400
+
+        # Refetch the Google Sheet data
+        sheet_data = fetch_sheet_data(sheet_id)
+        values = sheet_data.get("values")
+        if not values or len(values) < 2:
+            return jsonify({"error": "Sheet data is insufficient for analysis"}), 400
+
+        # Save the raw sheet data
+        raw_data = values
+
+        # Process the data rows using the first row as headers.
+        header = values[0]
+        data_rows = []
+        for row in values[1:]:
+            row_dict = {}
+            for i, key in enumerate(header):
+                row_dict[key] = row[i] if i < len(row) else None
+            data_rows.append(row_dict)
+
+        # Convert numeric values (except for the first column) where possible.
+        for row in data_rows:
+            for key in header[1:]:
+                try:
+                    row[key] = float(row[key]) if row[key] is not None else None
+                except (ValueError, TypeError):
+                    pass
+
+        # Update charts based on the existing configuration (if provided)
+        updated_charts = []
+        previous_charts = data.get('data', {}).get('charts')
+        if previous_charts:
+            for chart in previous_charts:
+                chart_type = chart.get('type')
+                chart_title = chart.get('title', "Untitled Chart")  # Use existing title if available
+
+                if chart_type in ['line', 'bar']:
+                    # For line and bar charts, update the dataset but keep the title
+                    chart['data'] = data_rows
+                    chart['xAxis'] = header[0]  # Ensure x-axis consistency
+                elif chart_type == 'pie':
+                    # For the pie chart, use the new last row to rebuild the pie data.
+                    if data_rows:
+                        last_row = data_rows[-1]
+                        pie_data = []
+                        for col in header[1:]:
+                            pie_data.append({
+                                "Student": col,
+                                "Score": last_row.get(col)
+                            })
+                        chart['data'] = pie_data
+                        # Update the title while keeping the existing structure
+                        chart['title'] = re.sub(r'\(.*\)', f"({last_row.get(header[0], 'N/A')})", chart_title)
+
+                updated_charts.append(chart)
+        else:
+            # If no previous configuration was provided, recreate candidate charts.
+            candidate_charts = {"charts": []}
+            candidate_charts["charts"].append({
+                "title": "Student Scores Over Time",
+                "type": "line",
+                "xAxis": header[0],
+                "data": data_rows,
+                "series": [{"key": col} for col in header[1:]]
+            })
+            candidate_charts["charts"].append({
+                "title": "Student Scores Over Time (Bar Chart)",
+                "type": "bar",
+                "xAxis": header[0],
+                "data": data_rows,
+                "series": [{"key": col} for col in header[1:]]
+            })
+            if data_rows:
+                last_row = data_rows[-1]
+                pie_data = []
+                for col in header[1:]:
+                    pie_data.append({
+                        "Student": col,
+                        "Score": last_row.get(col)
+                    })
+                candidate_charts["charts"].append({
+                    "title": f"Student Scores Distribution (Pie Chart for {last_row.get(header[0], 'N/A')})",
+                    "type": "pie",
+                    "xAxis": "Student",
+                    "data": pie_data,
+                    "series": [{"key": "Score"}]
+                })
+            updated_charts = candidate_charts["charts"]
+
+        # Build the final response with updated charts, raw sheet data, and the sheet URL.
+        final_response = {
+            "charts": updated_charts,
+            "raw_data": raw_data,
+            "sheet_url": sheet_url  # Pass back the sheet's URL
         }
-        return jsonify(testParam), 200  # Returning a JSON response with a 200 status code
+        return jsonify(final_response), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 400  # Handle errors gracefully
+        return jsonify({"error": str(e)}), 500
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
