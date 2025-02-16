@@ -24,7 +24,7 @@ export default function CreateDashboard() {
 
     // Redirect to the dashboard page with the sheet URL and prompt as query parameters
     router.push(`/dashboard?sheet_url=${encodeURIComponent(sheetUrl)}&prompt=${encodeURIComponent(prompt)}`);
-    setIsLoading(false)
+
   }
 
   return (
