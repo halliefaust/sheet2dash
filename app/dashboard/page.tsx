@@ -43,18 +43,21 @@ export default function Dashboard() {
 
   // Fetch data when the page loads
   useEffect(() => {
+    let isCancelled = false; // Prevent duplicate calls
+  
     const fetchData = async () => {
       if (!sheetUrl) {
         toast({
           title: "Error",
           description: "URL or prompt is missing in search parameters.",
           variant: "destructive",
-        })
-        return
+        });
+        return;
       }
-
-      setIsLoading(true)
-      console.log("Fetching data... ")
+  
+      setIsLoading(true);
+      console.log("Fetching data...");
+  
       try {
         const response = await fetch("http://127.0.0.1:5000/analyze-sheet", {
           method: "POST",
@@ -62,33 +65,42 @@ export default function Dashboard() {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ sheet_url: sheetUrl, prompt: userPrompt }),
-        })
-
+        });
+  
         if (!response.ok) {
-          throw new Error("Failed to fetch data")
+          throw new Error("Failed to fetch data");
         }
-
-        const result = await response.json()
-        setChartData(result)
-        toast({
-          title: "Success",
-          description: "Data successfully loaded.",
-          variant: "default",
-        })
+  
+        const result = await response.json();
+        if (!isCancelled) {
+          setChartData(result);
+          toast({
+            title: "Success",
+            description: "Data successfully loaded.",
+            variant: "default",
+          });
+        }
       } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to fetch data. Please try again.",
-          variant: "destructive",
-        })
-        console.error(error)
+        if (!isCancelled) {
+          toast({
+            title: "Error",
+            description: "Failed to fetch data. Please try again.",
+            variant: "destructive",
+          });
+          console.error(error);
+        }
       } finally {
-        setIsLoading(false)
+        if (!isCancelled) setIsLoading(false);
       }
-    }
-
-    fetchData()
-  }, [sheetUrl, userPrompt])
+    };
+  
+    fetchData();
+  
+    return () => {
+      isCancelled = true; // Cleanup function to prevent duplicate calls
+    };
+  }, [sheetUrl, userPrompt]);
+  
 
   const handleSync = async () => {
     // Implement sync functionality here
