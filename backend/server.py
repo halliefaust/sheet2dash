@@ -35,7 +35,7 @@ def fetch_sheet_data(sheet_id, sheet_range="A1:Z1000"):
         raise Exception(f"Error fetching sheet data: {response.text}")
     return response.json()
 
-def ask_llm_about_dashboard(processed_data, candidate_chart):
+def ask_llm_about_dashboard(processed_data, candidate_chart, user_prompt):
     """
     Passes the processed sheet data and candidate chart configuration
     to the LLM and asks it to suggest the best chart configuration.
@@ -47,8 +47,8 @@ I have the following Google Sheet data:
 I have prepared the following chart configuration options:
 {json.dumps(candidate_chart, indent=2)}
 
-Based on the data, please suggest the most appropriate chart configurations from the candidate options.
-If none of the options are appropriate, return an empty array for "charts".
+Based on the data, please suggest the three to eight most appropriate chart configurations from the candidate options. 
+If none of the options are appropriate, return an empty array for "charts". Here is the prompt provied by the user: {user_prompt} \n
 
 Please respond in JSON format only.
 """
@@ -158,7 +158,13 @@ def analyze_sheet():
         candidate_charts["charts"].append(pie_chart)
 
     # Ask the LLM to select/improve the best chart configurations
-    llm_answer_str = ask_llm_about_dashboard(data_rows, candidate_charts)
+    print("user prompt", data.get('prompt'))
+    llm_answer_str = ask_llm_about_dashboard(data_rows, candidate_charts, data.get('prompt'))
+    if not llm_answer_str:
+        return jsonify({
+            "error": "LLM returned an empty response."
+        }), 500
+
     llm_answer_str = llm_answer_str.lstrip()
     # If the response starts with "json", remove it.
     if llm_answer_str.startswith("json"):
