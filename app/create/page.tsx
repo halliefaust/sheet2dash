@@ -8,6 +8,9 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "@/components/ui/use-toast"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
+import { ArrowLeft, Sparkles, TableProperties } from "lucide-react"
+import Link from "next/link"
 
 export default function CreateDashboard() {
   const [sheetUrl, setSheetUrl] = useState("")
@@ -25,48 +28,77 @@ export default function CreateDashboard() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="bg-white border-b">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-gray-800">Create New Dashboard</h1>
+    <div className="flex flex-col min-h-screen bg-gray-50">
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container flex items-center justify-between h-16">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/">
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+            </Button>
+            <div className="flex items-center gap-2">
+              <TableProperties className="h-5 w-5 text-primary" />
+              <h1 className="text-xl font-semibold">Create New Dashboard</h1>
+            </div>
+          </div>
         </div>
       </header>
+
       <main className="flex-grow container mx-auto px-4 py-8">
-        <div className="max-w-md mx-auto">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="sheet-url">Google Sheet URL</Label>
-              <Input
-                id="sheet-url"
-                type="url"
-                placeholder="https://docs.google.com/spreadsheets/d/..."
-                value={sheetUrl}
-                onChange={(e) => setSheetUrl(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="prompt">Dashboard Preferences (Optional)</Label>
-              <Textarea
-                id="prompt"
-                placeholder="Enter any specific requirements for your dashboard (e.g., types of charts, color schemes, etc.)"
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                className="min-h-[100px]"
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
-              {isLoading ? "Generating..." : "Generate Dashboard"}
-            </Button>
-          </form>
-        </div>
+        <Card className="max-w-xl mx-auto">
+          <CardHeader>
+            <CardTitle>Dashboard Configuration</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="sheet-url">Google Sheet URL</Label>
+                <Input
+                  id="sheet-url"
+                  type="url"
+                  placeholder="https://docs.google.com/spreadsheets/d/..."
+                  value={sheetUrl}
+                  onChange={(e) => setSheetUrl(e.target.value)}
+                  required
+                  className="h-12"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="prompt">Customization Preferences</Label>
+                <Textarea
+                  id="prompt"
+                  placeholder="Describe your ideal dashboard. For example:
+• Chart types you'd like to see
+• Specific metrics to highlight
+• Color scheme preferences
+• Layout suggestions"
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  className="min-h-[160px] resize-none"
+                />
+              </div>
+              <Button 
+                type="submit" 
+                className="w-full h-12" 
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4 animate-spin" />
+                    Generating Dashboard...
+                  </span>
+                ) : (
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="h-4 w-4" />
+                    Generate Dashboard
+                  </span>
+                )}
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </main>
-      <footer className="bg-gray-100">
-        <div className="container mx-auto px-4 py-4 text-center text-gray-600">
-          © 2023 Dashboard Generator. All rights reserved.
-        </div>
-      </footer>
     </div>
   )
 }
-
