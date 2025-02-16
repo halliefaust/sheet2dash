@@ -19,31 +19,9 @@ export default function CreateDashboard() {
     e.preventDefault()
     setIsLoading(true)
 
-    try {
-      const response = await fetch("http://127.0.0.1:5000/analyze-sheet", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sheet_url: sheetUrl, prompt: prompt }),
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch data")
-      }
-
-      const result = await response.json()
-      result.sheet_url = sheetUrl
-
-      // Pass the received data to the dashboard page
-      router.push(`/dashboard?data=${encodeURIComponent(JSON.stringify(result))}`)
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to create dashboard. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
-      setIsLoading(false)
-    }
+    // Redirect to the dashboard page with the sheet URL and prompt as query parameters
+    router.push(`/dashboard?sheet_url=${encodeURIComponent(sheetUrl)}&prompt=${encodeURIComponent(prompt)}`);
+    setIsLoading(false)
   }
 
   return (
