@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Sheet2Dash',
+  title: 'Dashify',
   description: 'Instantly create dynamic dashboard from sheets',
   icons: {
     icon: '/favicon.ico',
