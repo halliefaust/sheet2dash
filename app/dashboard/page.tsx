@@ -236,7 +236,8 @@ export default function Dashboard() {
           ))}
         </ResponsiveGridLayout>
       </main>
-      <div className="fixed bottom-4 right-4 flex flex-col space-y-4">
+      <div className="fixed bottom-4 right-4 flex flex-col items-end space-y-4">
+      <div className="relative">
         <Button
           onClick={() => setShowChat(true)}
           className="rounded-full w-12 h-12 p-0 overflow-hidden transition-all duration-300 ease-in-out hover:w-24 group relative"
@@ -246,6 +247,8 @@ export default function Dashboard() {
           </span>
           <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Modify</span>
         </Button>
+      </div>
+      <div className="relative">
         <Button
           onClick={handleSync}
           className="rounded-full w-12 h-12 p-0 overflow-hidden transition-all duration-300 ease-in-out hover:w-24 group relative"
@@ -256,6 +259,7 @@ export default function Dashboard() {
           <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300">Sync</span>
         </Button>
       </div>
+    </div>
       {showChat && (
         <div className="fixed bottom-20 right-4 w-80 bg-white rounded-lg shadow-lg p-4">
           <div className="flex justify-between items-center mb-4">
