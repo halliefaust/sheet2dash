@@ -165,6 +165,16 @@ def analyze_sheet():
         }), 500
 
     llm_answer_str = llm_answer_str.lstrip()
+    if llm_answer_str.startswith("```"):
+        lines = llm_answer_str.splitlines()
+        # If the first line includes language info (e.g., "```json"), remove it.
+        if lines[0].startswith("```"):
+            lines = lines[1:]
+        # Remove the last line if it's a closing code fence
+        if lines and lines[-1].startswith("```"):
+            lines = lines[:-1]
+        llm_answer_str = "\n".join(lines).strip()
+        
     # If the response starts with "json", remove it.
     if llm_answer_str.startswith("json"):
         llm_answer_str = llm_answer_str[len("json"):].strip()
@@ -172,6 +182,7 @@ def analyze_sheet():
     try:
         llm_chart = json.loads(llm_answer_str)
     except Exception as e:
+        print(f"Error parsing LLM response. Raw response: {llm_answer_str}. Exception: {str(e)}")
         return jsonify({
             "error": f"Error parsing LLM response. Raw response: {llm_answer_str}. Exception: {str(e)}"
         }), 500
