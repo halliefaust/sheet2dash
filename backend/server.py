@@ -187,23 +187,32 @@ def analyze_sheet():
     return jsonify(final_response)
 
 # TODO: modify later
-@app.route('/resync', methods=['GET'])
+@app.route('/resync', methods=['POST'])
 def resync():
-    testParam = {
-        "charts": [
-            {
-                "data": [
-                    {"": "1", "jack": 10, "jill": 12},
-                    {"": "2", "jack": 15, "jill": 30}
-                ],
-                "series": [{"key": "jack"}, {"key": "jill"}],
-                "title": "Student Scores Over Time",
-                "type": "line",
-                "xAxis": ""
-            }
-        ]
-    }
-    return jsonify(testParam)
+    # Parse JSON from the request body
+    try:
+        data = request.get_json()
+        print("Received Data:", data)  # Debugging output
+
+        # Example test response
+        testParam = {
+            "charts": [
+                {
+                    "data": [
+                        {"": "1", "jack": 10, "jill": 12},
+                        {"": "2", "jack": 15, "jill": 30}
+                    ],
+                    "series": [{"key": "jack"}, {"key": "jill"}],
+                    "title": "Student Scores Over Time",
+                    "type": "line",
+                    "xAxis": ""
+                }
+            ]
+        }
+        return jsonify(testParam), 200  # Returning a JSON response with a 200 status code
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400  # Handle errors gracefully
 
 if __name__ == '__main__':
     app.run(debug=True)

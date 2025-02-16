@@ -47,13 +47,14 @@ export default function Dashboard() {
         try {
           // Create a JSON object to send
           // TODO: clear the chart data
-          const jsonObject = { sheet_url: data.sheet_url, data: data }
-      
-          // Convert the JSON object to a query string
-          const queryString = new URLSearchParams(jsonObject).toString()
-      
-          // Make the GET request
-          const response = await fetch(`http://127.0.0.1:5000/resync?${queryString}`)
+        const response = await fetch("http://127.0.0.1:5000/resync", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ sheet_url: data.sheet_url, data: data })
+        });
+        
       
           if (!response.ok) {
             throw new Error("Failed to resync data")
