@@ -19,8 +19,10 @@ import { toast } from "@/components/ui/use-toast"
 const ResponsiveGridLayout = WidthProvider(Responsive)
 
 export default function Dashboard() {
+  const [isLoading, setIsLoading] = useState(false)
   const searchParams = useSearchParams()
-  const dataParam = searchParams.get("data")
+  const sheetUrl = searchParams.get("sheet_url")
+  const userPrompt = searchParams.get("prompt")
 
   const [mounted, setMounted] = useState(false)
 
@@ -28,19 +30,65 @@ export default function Dashboard() {
     setMounted(true) // Prevents hydration mismatch
   }, [])
 
-  if (!dataParam) {
-    return <div>Error: No data provided</div>
+  const [data, setChartData] = useState({
+    charts: [], // Initialize with an empty string or some default value
+  });
+
+  if (!sheetUrl) {
+    return <div>Error: No url provided</div>
   }
 
-  const [data, setChartData] = useState(() => {
-    if (dataParam) {
-      console.log(dataParam)
-      return JSON.parse(decodeURIComponent(dataParam))
-    }
-    return { charts: [] }
-  })
   const [showChat, setShowChat] = useState(false)
   const [prompt, setPrompt] = useState("")
+
+  // Fetch data when the page loads
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!sheetUrl) {
+        toast({
+          title: "Error",
+          description: "URL or prompt is missing in search parameters.",
+          variant: "destructive",
+        })
+        return
+      }
+
+      setIsLoading(true)
+      console.log("Fetching data... ")
+      try {
+        const response = await fetch("http://127.0.0.1:5000/analyze-sheet", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ sheet_url: sheetUrl, prompt: userPrompt }),
+        })
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch data")
+        }
+
+        const result = await response.json()
+        setChartData(result)
+        toast({
+          title: "Success",
+          description: "Data successfully loaded.",
+          variant: "default",
+        })
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to fetch data. Please try again.",
+          variant: "destructive",
+        })
+        console.error(error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [sheetUrl, userPrompt])
 
   const handleSync = async () => {
         // Implement sync functionality here
@@ -54,7 +102,7 @@ export default function Dashboard() {
           headers: {
             "Content-Type": "application/json"
           },
-          body: JSON.stringify({ sheet_url: data.sheet_url, data: data })
+          body: JSON.stringify({ sheet_url: sheetUrl, data: data })
         });
         
       
@@ -83,12 +131,21 @@ export default function Dashboard() {
       }
   
   const handleRegenerate = async () => {
+    if (!sheetUrl) {
+      toast({
+        title: "Error",
+        description: "Sheet URL is missing. Please provide a valid sheet URL.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     console.log("Modifying data...")
     try {
       const response = await fetch("http://127.0.0.1:5000/analyze-sheet", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sheet_url: data.sheet_url, prompt: prompt }),
+        body: JSON.stringify({ sheet_url: sheetUrl, prompt: prompt }),
       })
 
       console.log("Received response!") // TODO: delete later
@@ -99,6 +156,7 @@ export default function Dashboard() {
 
       const result = await response.json()
       setChartData(result);
+
       setShowChat(false)
       setPrompt("")
       toast({
