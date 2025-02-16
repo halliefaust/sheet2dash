@@ -48,7 +48,7 @@ I have prepared the following chart configuration options:
 {json.dumps(candidate_chart, indent=2)}
 
 Based on the data, please suggest the three to eight most appropriate chart configurations from the candidate options. 
-If none of the options are appropriate, return an empty array for "charts". Here is the prompt provied by the user: {user_prompt} \n
+If none of the options are appropriate, return an empty array for "charts". Here is the prompt provided by the user: {user_prompt} \n
 
 Please respond in JSON format only.
 """
@@ -174,7 +174,7 @@ def analyze_sheet():
         if lines and lines[-1].startswith("```"):
             lines = lines[:-1]
         llm_answer_str = "\n".join(lines).strip()
-        
+
     # If the response starts with "json", remove it.
     if llm_answer_str.startswith("json"):
         llm_answer_str = llm_answer_str[len("json"):].strip()
